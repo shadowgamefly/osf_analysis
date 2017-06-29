@@ -62,3 +62,14 @@ def process_name_data(directory):
         print('{:d} files found, {:d} names among {:d} people loaded, {:d} male names, {:d} females names'.format(files, total, people, male, female))
     
     return sex_dict
+
+def load_json(dir, file):
+    filepath = os.path.join(dir, file)
+    if file in os.listdir(dir):
+        with open(filepath, 'rb') as f:
+            j = json.load(f)
+            print("name list loaded, {:d} names in total".format(len(j)))
+            return j, len(j)
+    else:
+        raise FileNotFoundError(('{:s} not found'.format(filepath)))
+        
