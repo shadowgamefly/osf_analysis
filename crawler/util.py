@@ -2,24 +2,25 @@ import os, shutil
 import pickle
 import queue
 
-dir = ''
+dir = os.getcwd()
 
 def write_pickle(filename, type, obj):
     global dir
-    with open(dir + '/cache/' + type + "/"+ filename, 'wb') as f:
+    with open(dir + '/cache/' + type + "/"+ filename + '.pickle', 'wb') as f:
         pickle.dump(obj, f)
 
-def load_pickle(filename):
+def load_pickle(filename, type):
     global dir
     try :
         with open(dir + '/cache/' + type + "/"+ filename, 'rb') as f:
             obj = pickle.load(f)
+            return obj
     except FileNotFoundError:
         return None
 
-def init():
+def init(cur_dir):
     global dir
-    dir = os.getcwd()
+    dir = cur_dir
     try :
         os.mkdir(dir + '/cache')
         os.mkdir(dir + '/cache/html')
@@ -61,3 +62,18 @@ def load_status():
             elif response == 'N' :
                 raise e
             print("Please re-enter your response")
+
+def record_status(q, h, p):
+    global dir
+    try :
+        with open(dir + '/cache/param/queue.pickle', 'wb') as f:
+            pickle.dump(q, f)
+        with open(dir + '/cache/param/hash.pickle', 'wb') as f:
+            pickle.dump(h, f)
+        with open(dir + '/cache/param/page.pickle', 'wb') as f:
+            pickle.dump(p, f)
+        print("Finish dumping")
+    except (FileNotFoundError, EOFError) as e:
+        print(q, h, p)
+        print("Dumping failed")
+    return
