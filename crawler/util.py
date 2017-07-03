@@ -1,6 +1,7 @@
 import os, shutil
 import pickle
 import queue
+import json
 
 dir = os.getcwd()
 
@@ -17,6 +18,13 @@ def load_pickle(filename, type):
             return obj
     except FileNotFoundError:
         return None
+
+def write_json(subject, title, abstract):
+    global dir
+    with open(dir + '/cache/json/' + title + '.json', 'w', encoding='utf8') as f:
+        dic = {'subject': subject, 'title':title, 'abstract': abstract}
+        json.dump(dic, f)
+        print('dump to {:s}.json'.format(title))
 
 def init(cur_dir):
     global dir

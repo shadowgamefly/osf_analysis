@@ -18,7 +18,27 @@ def menu_session(subject, dir):
         record_status(q, h, p)
         time.sleep(5)
 
+def content_session(subject, dir):
+    q, h, p = init(dir)
+    while q:
+        url = q[0]
+        response, status = crawl_content(url)
+        if status != 1:
+            print('{:s} is not valid, continue'.format(url))
+            q.pop(0)
+            continue
+        else :
+            title, description,status = content_parse(response)
+            if status != 1:
+                print('{:s} has no abstract, continue'.format(url))
+                q.pop(0)
+                continue
+            write_json(subject, title, description)
+        q.pop(0)
+        record_status(q, h, p)
+        time.sleep(1)
+
 if __name__ == '__main__':
     dir = os.getcwd()
     subject = 'law'
-    menu_session(subject, dir)
+    content_session(subject, dir)

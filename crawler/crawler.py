@@ -10,7 +10,7 @@ def crawl_menu(subject, page, cache):
     write_pickle(subject + '_page' + str(page), 'html', source)
     return url, 1
 
-def crawl_content(url, page, cache):
+def crawl_content(url):
     response = request.urlopen(url)
     source = response.read().decode("utf-8")
     if response.getcode() != 200 :
