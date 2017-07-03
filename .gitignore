@@ -4,8 +4,6 @@
 #data
 cache/
 names/
-*.pickle
-*.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
