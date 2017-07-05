@@ -16,5 +16,5 @@ def crawl_content(url):
         response = request.urlopen(url)
         source = response.read().decode("utf-8")
         return source, 1
-    except urllib.error.HTTPError :
+    except (urllib.error.HTTPError, UnicodeEncodeError) as e:
         return url, -1
