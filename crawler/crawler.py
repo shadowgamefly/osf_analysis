@@ -1,4 +1,5 @@
 from urllib import request
+import urllib
 from util import *
 
 def crawl_menu(subject, page, cache):
@@ -11,9 +12,9 @@ def crawl_menu(subject, page, cache):
     return url, 1
 
 def crawl_content(url):
-    response = request.urlopen(url)
-    source = response.read().decode("utf-8")
-    if response.getcode() != 200 :
-        return url, -1
-    else :
+    try :
+        response = request.urlopen(url)
+        source = response.read().decode("utf-8")
         return source, 1
+    except urllib.error.HTTPError :
+        return url, -1

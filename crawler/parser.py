@@ -11,10 +11,11 @@ def content_parse(source) :
     root = html.fromstring(source)
     try :
         title = root.xpath('.//title')[0].text
-        title = title[title.find('\"', 0) + 1 : title.find('\"', title.find('\"', 0) + 1)]
-        abstract = root.xpath(".//meta[@name='description']")[1].get('content')
+        title = title[title.find('\"', 0) + 1 : title.find('\"', title.find('\"', 0) + 1)].encode('ascii', 'ignore').decode('ascii')
+        abstract = root.xpath(".//meta[@name='description']")[1].get('content').encode('ascii', 'ignore').decode('ascii')
         return title, abstract, 1
     except IndexError:
         return title, "", -1
+
 if __name__ == '__main__':
     print(menu_parse('law_page15.pickle'))
