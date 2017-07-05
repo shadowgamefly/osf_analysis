@@ -38,7 +38,18 @@ def content_session(subject, dir):
         record_status(q, h, p)
         time.sleep(1)
 
+def rename_json(subject, dir):
+    count = 1
+    json_dir = dir + "/cache/json/"
+    for file in os.listdir(json_dir):
+        os.rename("{:s}{:s}".format(json_dir, file), "{:s}{:d}.json".format(json_dir, count))
+        count += 1
+    with open("{:s}/cache/param/count.pickle".format(dir), 'wb') as f:
+        pickle.dump(count, f)
+    print(count)
+
 if __name__ == '__main__':
     dir = os.getcwd()
     subject = 'law'
+#    rename_json(subject, dir)
     content_session(subject, dir)
