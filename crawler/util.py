@@ -13,7 +13,7 @@ def write_pickle(filename, type, obj):
 def load_pickle(filename, type):
     global dir
     try :
-        with open(dir + '/cache/' + type + "/"+ filename, 'rb') as f:
+        with open(dir + '/cache/' + type + "/"+ filename + '.pickle', 'rb') as f:
             obj = pickle.load(f)
             return obj
     except FileNotFoundError:
@@ -21,10 +21,23 @@ def load_pickle(filename, type):
 
 def write_json(subject, title, abstract):
     global dir
-    with open(dir + '/cache/json/' + title + '.json', 'w', encoding='utf8') as f:
-        dic = {'subject': subject, 'title':title, 'abstract': abstract}
-        json.dump(dic, f)
-        print('dump to {:s}.json'.format(title))
+    count = 0
+    try :
+        count = load_pickle('count', 'param')
+    except FileNotFoundError:
+        print("count for json not found, creating new param count")
+        count = 0
+        write_pickle('count', 'param', count)
+    try :
+        with open(dir + '/cache/json/' + str(count) + '.json', 'w', encoding='utf8') as f:
+            dic = {'subject': subject, 'title':title, 'abstract': abstract}
+            json.dump(dic, f)
+            print('dump to {:d}.json'.format(count))
+            count += 1
+    except FileNotFoundError:
+        print("fail to dump for {:s}".format(subject))
+    
+    write_pickle('count', 'param', count)
 
 def init(cur_dir):
     global dir
