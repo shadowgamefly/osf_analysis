@@ -13,7 +13,7 @@ def write_pickle(filename, type, obj):
 def load_pickle(filename, type):
     global dir
     try :
-        with open(dir + '/cache/' + type + "/"+ filename + '.pickle', 'rb') as f:
+        with open(dir + '/cache/' + type + "/"+ filename, 'rb') as f:
             obj = pickle.load(f)
             return obj
     except FileNotFoundError:

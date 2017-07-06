@@ -5,6 +5,7 @@ import time
 
 def menu_session(subject, dir):
     q, h, p = init(dir)
+    print(q, h, p)
     while True:
         url, status = crawl_menu(subject, p, dir)
         if status != 1 :
@@ -16,7 +17,7 @@ def menu_session(subject, dir):
         p += 1
         print(q)
         record_status(q, h, p)
-        time.sleep(5)
+        time.sleep(2)
 
 def content_session(subject, dir):
     q, h, p = init(dir)
@@ -50,6 +51,5 @@ def rename_json(subject, dir):
 
 if __name__ == '__main__':
     dir = os.getcwd()
-    subject = 'law'
-#    rename_json(subject, dir)
-    content_session(subject, dir)
+    subject = 'social-and-behavioral-sciences'
+    menu_session(subject, dir)
