@@ -2,6 +2,9 @@
 .DS_Store
 
 #data
+cnn/cache/
+cnn/data/
+cnn/data_old/
 cache/
 names/
 *.bin
