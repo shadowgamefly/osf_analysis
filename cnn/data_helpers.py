@@ -33,11 +33,23 @@ def subject_to_label(subject):
     return dict[subject]
 
 # learned word vector mapping
-def load_data_and_labels():
+def load_data_and_labels(reindex = False):
     """
     Loads MR polarity data from files, splits the data into words and generates labels.
     Returns split sentences and labels.
     """
+    if not reindex :
+        print('loading preindexed data')
+        try :
+            with open('cache/x_text.pickle', 'rb') as f :
+                x_text = pickle.load(f)
+
+            with open('cache/y.pickle', 'rb') as f :
+                y = pickle.load(f)
+
+            return [x_text, y]
+        except FileNotFoundError:
+            print("preload data not found, reloading")
     # Load data from files
     x_text = []
     y = []
@@ -56,10 +68,22 @@ def load_data_and_labels():
 
     return [x_text, y]
 
-def load_data_and_labels_2():
+def load_data_and_labels_2(reindex = False):
+    if not reindex :
+        print('loading preindexed data')
+        try :
+            with open('cache/static_x.pickle', 'rb') as f :
+                x = pickle.load(f)
+
+            with open('cache/y.pickle', 'rb') as f :
+                y = pickle.load(f)
+
+            return [x, y]
+        except FileNotFoundError:
+            print("preload data not found, reloading")
     x_text = []
     y = []
-    model = gensim.models.KeyedVectors.load_word2vec_format('../osf_analysis/data/GoogleNews-vectors-negative300.bin', binary=True)
+    model = gensim.models.KeyedVectors.load_word2vec_format('../data/GoogleNews-vectors-negative300.bin', binary=True)
     print('finish model loading')
     for file in os.listdir(os.getcwd() + '/data') :
         with open(os.getcwd() + '/data/' +file, 'rb') as j:

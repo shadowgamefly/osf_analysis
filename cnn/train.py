@@ -53,7 +53,7 @@ print("Loading data...")
 # vocab_processor = learn.preprocessing.VocabularyProcessor(max_document_length)
 # x = np.array(list(vocab_processor.fit_transform(x_text)))
 
-x, y = data_helpers.load_data_and_labels_2()
+x, y = data_helpers.load_data_and_labels_2(reindex = True)
 x = np.array(x)
 y = np.array(y)
 
