@@ -5,7 +5,6 @@ import time
 
 def menu_session(subject, dir):
     q, h, p = init(dir)
-    print(q, h, p)
     while True:
         url, status = crawl_menu(subject, p, dir)
         if status != 1 :
@@ -15,9 +14,9 @@ def menu_session(subject, dir):
         links = menu_parse(subject + '_page' + str(p) + '.pickle')
         q += links
         p += 1
-        print(q)
+        print(len(q))
         record_status(q, h, p)
-        time.sleep(2)
+        time.sleep(1)
 
 def content_session(subject, dir):
     q, h, p = init(dir)
