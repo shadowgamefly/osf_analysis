@@ -50,6 +50,6 @@ def rename_json(subject, dir):
 
 if __name__ == '__main__':
     dir = os.getcwd()
-    subject = 'law'
-#    rename_json(subject, dir)
-    content_session(subject, dir)
+    subject = 'social-and-behavioral-sciences'
+    write_pickle('page', 'param', 1)
+    menu_session(subject, dir)
