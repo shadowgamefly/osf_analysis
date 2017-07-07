@@ -36,7 +36,7 @@ def write_json(subject, title, abstract):
             count += 1
     except FileNotFoundError:
         print("fail to dump for {:s}".format(subject))
-    
+
     write_pickle('count', 'param', count)
 
 def init(cur_dir):
