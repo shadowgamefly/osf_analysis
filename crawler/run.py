@@ -6,12 +6,17 @@ import time
 def menu_session(subject, dir):
     q, h, p = init(dir)
     while True:
-        url, status = crawl_menu(subject, p, dir)
-        if status != 1 :
-            print("Crawling finished")
-            break
-        print("{:s} saved".format(url))
-        links = menu_parse(subject + '_page' + str(p) + '.pickle')
+        error = 0
+        try :
+            source = crawl_menu(subject, p, dir)
+            error = 0
+        except Exception:
+            error += 1
+            if error > 2 :
+                print("stop at page {:d} with queue {:d}".format(p, len(q)))
+                break                
+            continue
+        links = menu_parse(source)
         q += links
         p += 1
         print(len(q))
