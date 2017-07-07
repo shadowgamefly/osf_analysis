@@ -56,4 +56,4 @@ def rename_json(subject, dir):
 if __name__ == '__main__':
     dir = os.getcwd()
     subject = 'social-and-behavioral-sciences'
-    menu_session(subject, dir)
+    content_session(subject, dir)

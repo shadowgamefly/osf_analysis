@@ -23,13 +23,14 @@ def write_json(subject, title, abstract):
     global dir
     count = 0
     try :
-        count = load_pickle('count', 'param')
+        count = load_pickle('count.pickle', 'param')
     except FileNotFoundError:
         print("count for json not found, creating new param count")
         count = 0
         write_pickle('count', 'param', count)
     try :
-        with open(dir + '/cache/json/' + str(count) + '.json', 'w', encoding='utf8') as f:
+        print(dir, subject, count)
+        with open('{:s}/cache/json/{:s}/{:d}.json'.format(dir, subject, count), 'w', encoding='utf8') as f:
             dic = {'subject': subject, 'title':title, 'abstract': abstract}
             json.dump(dic, f)
             print('dump to {:d}.json'.format(count))
