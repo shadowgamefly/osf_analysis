@@ -1,8 +1,7 @@
 import lxml.html as html
 from util import *
 
-def menu_parse(file) :
-    source = load_pickle(file, 'html')
+def menu_parse(source) :
     root = html.fromstring(source)
     elements = root.xpath('.//a[text()="Go to article "]')
     return [e.get("href") for e in elements if "http://works.bepress.com/" in e.get("href")]
