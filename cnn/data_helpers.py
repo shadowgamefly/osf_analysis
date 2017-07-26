@@ -29,7 +29,13 @@ def clean_str(string):
     return string.strip().lower()
 
 def subject_to_label(subject):
-    dict = {'law' : [1, 0], 'social-and-behavioral-sciences': [0, 1]}
+    category = ['law', 'social-and-behavioral-sciences', 'arts-and-humanities', 'education', 'medicine-and-health-sciences', \
+     'life-sciences', 'physical-sciences-and-mathematics', 'engineering', 'business', 'architecture']
+    l = []
+    for i in range(10) :
+        l.append([0 for i in range(10)])
+        l[i][i] = 1
+    dict = {category[i] : l[i] for i in range(10)}
     return dict[subject]
 
 # learned word vector mapping
@@ -41,24 +47,28 @@ def load_data_and_labels(reindex = False):
     if not reindex :
         print('loading preindexed data')
         try :
-            with open('cache/x_text.pickle', 'rb') as f :
+            with open('cache/new_x_text.pickle', 'rb') as f :
                 x_text = pickle.load(f)
 
-            with open('cache/y.pickle', 'rb') as f :
+            with open('cache/new_y.pickle', 'rb') as f :
                 y = pickle.load(f)
 
-            return [x_text, y]
+            return x_text, y
+
         except FileNotFoundError:
             print("preload data not found, reloading")
     # Load data from files
     x_text = []
     y = []
-    # model = gensim.models.KeyedVectors.load_word2vec_format('./data/GoogleNews-vectors-negative300.bin', binary=True)
-    for file in os.listdir(os.getcwd() + '/data') :
-        with open(os.getcwd() + '/data/' +file, 'rb') as j:
-            obj = json.load(j)
-            x_text.append(clean_str(obj['abstract']))
-            y.append(subject_to_label(obj['subject']))
+    data_dir = os.getcwd() + '/data/'
+    for category in os.listdir(data_dir):
+        if '.' in category:
+            continue
+        for file in os.listdir(data_dir + category):
+            with open(data_dir + category + '/' +file, 'rb') as j:
+                obj = json.load(j)
+                x_text.append(clean_str(obj['abstract']))
+                y.append(subject_to_label(obj['subject']))
 
     with open('cache/x_text.pickle', 'wb') as f :
         pickle.dump(x_text, f)
@@ -68,59 +78,20 @@ def load_data_and_labels(reindex = False):
 
     return [x_text, y]
 
-def load_data_and_labels_2(reindex = False):
-    if not reindex :
-        print('loading preindexed data')
-        try :
-            with open('cache/static_x.pickle', 'rb') as f :
-                x = pickle.load(f)
-
-            with open('cache/y.pickle', 'rb') as f :
-                y = pickle.load(f)
-
-            return [x, y]
-        except FileNotFoundError:
-            print("preload data not found, reloading")
+def load_projects():
+    print('loading projects from data/projects.json')
     x_text = []
-    y = []
-    model = gensim.models.KeyedVectors.load_word2vec_format('../data/GoogleNews-vectors-negative300.bin', binary=True)
-    print('finish model loading')
-    for file in os.listdir(os.getcwd() + '/data') :
-        with open(os.getcwd() + '/data/' +file, 'rb') as j:
-            obj = json.load(j)
-            x_text.append(clean_str(obj['abstract']))
-            y.append(subject_to_label(obj['subject']))
+    id = []
+    with open('../data/projects_with_contributors.json', 'rb') as f:
+        l = json.load(f)
+    for project in l:
+        if len(project['description'].split(' ')) < 10:
+            continue
+        else :
+            x_text.append(clean_str(project['description']))
+            id.append(project['_id'])
+    return x_text, id
 
-    print('finish first iter loading')
-    x = []
-    max_len = -1
-    min_len = 1000
-    for text in x_text:
-        words = text.split(' ')
-        embedding = []
-        for word in words:
-            if word in model:
-                embedding.append(model[word])
-        if max_len < len(embedding):
-            max_len = len(embedding)
-        if min_len > len(embedding):
-            min_len = len(embedding)
-        x.append(embedding)
-    print('finish second iter loading')
-
-    print(max_len, min_len)
-    for embedding in x:
-        if len(embedding) < max_len:
-            embedding += [0 for i in range(300)] * (max_len - len(embedding))
-
-    print('finish third iter loading')
-
-    with open('cache/static_x.pickle', 'wb') as f:
-        pickle.dump(x, f)
-
-    print('finish dumping')
-
-    return x, y
 
 def batch_iter(data, batch_size, num_epochs, shuffle=True):
     """
@@ -141,5 +112,11 @@ def batch_iter(data, batch_size, num_epochs, shuffle=True):
             end_index = min((batch_num + 1) * batch_size, data_size)
             yield shuffled_data[start_index:end_index]
 
+
+def inspect_projects():
+    with open('../data/projects_with_contributors.json', 'rb') as f:
+        l = json.load(f)
+    print(l[0])
+
 if __name__ == '__main__':
-    load_data_and_labels_2()
+    load_projects()

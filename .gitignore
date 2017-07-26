@@ -3,11 +3,13 @@
 
 #data
 
+cnn/runs/
 cnn/cache/
 cnn/data/
 cnn/data_old/
 cache/
 names/
+data/
 
 *.bin
 

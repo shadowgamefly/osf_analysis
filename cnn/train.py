@@ -1,5 +1,5 @@
 #! /usr/bin/env python
-
+import sys
 import tensorflow as tf
 import numpy as np
 import os
@@ -13,10 +13,9 @@ from tensorflow.contrib import learn
 # ==================================================
 
 # Data loading params
-tf.flags.DEFINE_float("dev_sample_percentage", .1, "Percentage of the training data to use for validation")
-
+tf.flags.DEFINE_float("dev_sample_percentage", .05, "Percentage of the training data to use for validation")
+tf.flags.DEFINE_string("word2vec", "GoogleNews-vectors-negative300.bin", "pretrained data")
 # Model Hyperparameters
-# tf.flags.DEFINE_integer("embedding_dim", 128, "Dimensionality of character embedding (default: 128)")
 tf.flags.DEFINE_integer("embedding_dim", 300, "Dimensionality of character embedding (default: 128)")
 tf.flags.DEFINE_string("filter_sizes", "3,4,5", "Comma-separated filter sizes (default: '3,4,5')")
 tf.flags.DEFINE_integer("num_filters", 128, "Number of filters per filter size (default: 128)")
@@ -25,13 +24,18 @@ tf.flags.DEFINE_float("l2_reg_lambda", 0.0, "L2 regularization lambda (default: 
 
 # Training parameters
 tf.flags.DEFINE_integer("batch_size", 64, "Batch Size (default: 64)")
-tf.flags.DEFINE_integer("num_epochs", 200, "Number of training epochs (default: 200)")
+tf.flags.DEFINE_integer("num_epochs", 800, "Number of training epochs (default: 200)")
 tf.flags.DEFINE_integer("evaluate_every", 100, "Evaluate model on dev set after this many steps (default: 100)")
 tf.flags.DEFINE_integer("checkpoint_every", 100, "Save model after this many steps (default: 100)")
 tf.flags.DEFINE_integer("num_checkpoints", 5, "Number of checkpoints to store (default: 5)")
 # Misc Parameters
 tf.flags.DEFINE_boolean("allow_soft_placement", True, "Allow device soft device placement")
 tf.flags.DEFINE_boolean("log_device_placement", False, "Log placement of ops on devices")
+
+log = open("train_log", 'w')
+
+old_std = sys.stdout
+sys.stdout = log
 
 FLAGS = tf.flags.FLAGS
 FLAGS._parse_flags()
@@ -47,16 +51,12 @@ print("")
 # Load data
 print("Loading data...")
 
-# x_text, y = data_helpers.load_data_and_labels_2()
+x, y = data_helpers.load_data_and_labels()
 # Build vocabulary
-# max_document_length = max([len(x.split(" ")) for x in x_text])
-# vocab_processor = learn.preprocessing.VocabularyProcessor(max_document_length)
-# x = np.array(list(vocab_processor.fit_transform(x_text)))
-
-x, y = data_helpers.load_data_and_labels_2(reindex = True)
-x = np.array(x)
+max_document_length = 100
+vocab_processor = learn.preprocessing.VocabularyProcessor(max_document_length)
+x = np.array(list(vocab_processor.fit_transform(x)))
 y = np.array(y)
-
 
 # Randomly shuffle data
 np.random.seed(10)
@@ -138,6 +138,31 @@ with tf.Graph().as_default():
         # Initialize all variables
         sess.run(tf.global_variables_initializer())
 
+        if FLAGS.word2vec:
+            # initial matrix with random uniform
+            initW = np.random.uniform(-0.25,0.25,(len(vocab_processor.vocabulary_), FLAGS.embedding_dim))
+            # load any vectors from the word2vec
+            print("Load word2vec file {}\n".format(FLAGS.word2vec))
+            with open(FLAGS.word2vec, "rb") as f:
+                header = f.readline()
+                vocab_size, layer1_size = map(int, header.split())
+                binary_len = np.dtype('float32').itemsize * layer1_size
+                for line in range(vocab_size):
+                    word = []
+                    while True:
+                        ch = f.read(1).decode('latin-1')
+                        if ch == ' ':
+                            word = ''.join(word)
+                            break
+                        if ch != '\n':
+                            word.append(ch)
+                    idx = vocab_processor.vocabulary_.get(word)
+                    if idx != 0:
+                        initW[idx] = np.fromstring(f.read(binary_len), dtype='float32')
+                    else:
+                        f.read(binary_len)
+            sess.run(cnn.W.assign(initW))
+
         def train_step(x_batch, y_batch):
             """
             A single training step
@@ -186,3 +211,6 @@ with tf.Graph().as_default():
             if current_step % FLAGS.checkpoint_every == 0:
                 path = saver.save(sess, checkpoint_prefix, global_step=current_step)
                 print("Saved model checkpoint to {}\n".format(path))
+
+sys.stdout = old_std
+log_file.close()

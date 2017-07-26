@@ -1,5 +1,5 @@
 #! /usr/bin/env python
-
+import json
 import tensorflow as tf
 import numpy as np
 import os
@@ -12,10 +12,6 @@ import csv
 
 # Parameters
 # ==================================================
-
-# Data Parameters
-tf.flags.DEFINE_string("positive_data_file", "./data/rt-polaritydata/rt-polarity.pos", "Data source for the positive data.")
-tf.flags.DEFINE_string("negative_data_file", "./data/rt-polaritydata/rt-polarity.neg", "Data source for the positive data.")
 
 # Eval Parameters
 tf.flags.DEFINE_integer("batch_size", 64, "Batch Size (default: 64)")
@@ -34,13 +30,10 @@ for attr, value in sorted(FLAGS.__flags.items()):
     print("{}={}".format(attr.upper(), value))
 print("")
 
-# CHANGE THIS: Load data. Load your own data here
-if FLAGS.eval_train:
-    x_raw, y_test = data_helpers.load_data_and_labels(FLAGS.positive_data_file, FLAGS.negative_data_file)
-    y_test = np.argmax(y_test, axis=1)
-else:
-    x_raw = ["a masterpiece four years in the making", "everything is off."]
-    y_test = [1, 0]
+x_raw, project_id = data_helpers.load_projects()
+
+# x_raw = x_raw[:64]
+# project_id = project_id[:64]
 
 # Map data into vocabulary
 vocab_path = os.path.join(FLAGS.checkpoint_dir, "..", "vocab")
@@ -70,6 +63,7 @@ with graph.as_default():
 
         # Tensors we want to evaluate
         predictions = graph.get_operation_by_name("output/predictions").outputs[0]
+        scores = graph.get_operation_by_name("output/scores").outputs[0]
 
         # Generate batches for one epoch
         batches = data_helpers.batch_iter(list(x_test), FLAGS.batch_size, 1, shuffle=False)
@@ -77,19 +71,21 @@ with graph.as_default():
         # Collect the predictions here
         all_predictions = []
 
+
+        count = 0
         for x_test_batch in batches:
             batch_predictions = sess.run(predictions, {input_x: x_test_batch, dropout_keep_prob: 1.0})
+            batch_score = sess.run(scores, {input_x: x_test_batch, dropout_keep_prob: 1.0})
+            for idx, score in enumerate(batch_score):
+                if all(i < 1 for i in score):
+                    batch_predictions[idx] = -1
             all_predictions = np.concatenate([all_predictions, batch_predictions])
-
-# Print accuracy if y_test is defined
-if y_test is not None:
-    correct_predictions = float(sum(all_predictions == y_test))
-    print("Total number of test examples: {}".format(len(y_test)))
-    print("Accuracy: {:g}".format(correct_predictions/float(len(y_test))))
+output = [{'description': x_raw[i], 'category' : all_predictions[i], 'id' : project_id[i]} for i in range(len(x_raw))]
 
 # Save the evaluation to a csv
-predictions_human_readable = np.column_stack((np.array(x_raw), all_predictions))
-out_path = os.path.join(FLAGS.checkpoint_dir, "..", "prediction.csv")
+# predictions_human_readable = np.column_stack((np.array(x_raw), all_predictions))
+out_path = os.path.join(FLAGS.checkpoint_dir, "..", "prediction.json")
 print("Saving evaluation to {0}".format(out_path))
+
 with open(out_path, 'w') as f:
-    csv.writer(f).writerows(predictions_human_readable)
+    json.dump(output, f)
