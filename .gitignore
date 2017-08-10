@@ -10,6 +10,7 @@ cnn/data_old/
 cache/
 names/
 data/
+cnn/training_data.tar.gz
 
 *.bin
 

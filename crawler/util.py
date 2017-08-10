@@ -5,6 +5,7 @@ import json
 
 dir = os.getcwd()
 
+# pickle and json util for write and read
 def write_pickle(filename, type, obj):
     global dir
     with open(dir + '/cache/' + type + "/"+ filename + '.pickle', 'wb') as f:
@@ -40,6 +41,7 @@ def write_json(subject, title, abstract):
 
     write_pickle('count', 'param', count)
 
+# initialized the cache with all existing cache(if exists)
 def init(cur_dir):
     global dir
     dir = cur_dir
@@ -63,6 +65,7 @@ def init(cur_dir):
         print("Previous cache found, reloading...")
         return load_status()
 
+# beaware the reset cache will remove all your data crawled.
 def load_status():
     global dir
     try :
@@ -85,6 +88,7 @@ def load_status():
                 raise e
             print("Please re-enter your response")
 
+# record the run-time cache for state record
 def record_status(q, h, p):
     global dir
     try :

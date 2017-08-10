@@ -3,6 +3,7 @@ from crawler import *
 from parser import *
 import time
 
+# menu session crawled the menu page of each taxonomy and stored them into a queue of urls
 def menu_session(subject, dir):
     q, h, p = init(dir)
     while True:
@@ -23,6 +24,7 @@ def menu_session(subject, dir):
         record_status(q, h, p)
         time.sleep(1)
 
+# content session grab urls from the queue created by menu session, and crawl the content of each url page and store them        
 def content_session(subject, dir):
     q, h, p = init(dir)
     while q:
@@ -43,6 +45,7 @@ def content_session(subject, dir):
         record_status(q, h, p)
         time.sleep(1)
 
+# used for rename the data crawled
 def rename_json(subject, dir):
     count = 1
     json_dir = dir + "/cache/json/"
@@ -53,6 +56,9 @@ def rename_json(subject, dir):
         pickle.dump(count, f)
     print(count)
 
+# to run the crawler, one need to specify the subject to crawl, the directory to store the cache, then one can start
+# the menu_session followed by content session. Multiple crawler can run in parallel with different taxonomy, and both 
+# session save its own status upon each page reach. With minor change, menu session and content session can also run in parallel.
 if __name__ == '__main__':
     dir = os.getcwd()
     subject = 'social-and-behavioral-sciences'
